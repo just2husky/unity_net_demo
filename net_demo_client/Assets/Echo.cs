@@ -16,6 +16,7 @@ public class Echo : MonoBehaviour
     //接收缓冲区
     byte[] readBuff = new byte[1024];
     string recvStr = "";
+    List<Socket> checkRead = new List<Socket>();
 
     //点击连接按钮
     public void Connection()
@@ -89,14 +90,35 @@ public class Echo : MonoBehaviour
             Debug.Log("Socket Send fail" + ex.ToString());
         }
     }
+    /*    public void Update()
+        {
+            if (socket == null)
+            {
+                return;
+            }
+
+            if (socket.Poll(0, SelectMode.SelectRead))
+            {
+                byte[] readBuff = new byte[1024];
+                int count = socket.Receive(readBuff);
+                string recvStr =
+                    System.Text.Encoding.Default.GetString(readBuff, 0, count);
+                text.text = recvStr;
+            }
+        }*/
     public void Update()
     {
         if (socket == null)
         {
             return;
         }
-
-        if (socket.Poll(0, SelectMode.SelectRead))
+        //填充checkRead列表
+        checkRead.Clear();
+        checkRead.Add(socket);
+        //select
+        Socket.Select(checkRead, null, null, 0);
+        //check
+        foreach (Socket s in checkRead)
         {
             byte[] readBuff = new byte[1024];
             int count = socket.Receive(readBuff);
@@ -105,4 +127,6 @@ public class Echo : MonoBehaviour
             text.text = recvStr;
         }
     }
+
+
 }

@@ -103,6 +103,7 @@ class MainClass
     static Dictionary<Socket, ClientState> clients =
         new Dictionary<Socket, ClientState>();
 
+
     //读取Listenfd
     public static void ReadListenfd(Socket listenfd)
     {
@@ -163,28 +164,32 @@ class MainClass
         //Listen
         listenfd.Listen(0);
         Console.WriteLine("[服务器]启动成功");
+        //checkRead
+        List<Socket> checkRead = new List<Socket>();
         //主循环
         while (true)
         {
-            //检查listenfd
-            if (listenfd.Poll(0, SelectMode.SelectRead))
-            {
-                ReadListenfd(listenfd);
-            }
-            //检查clientfd
+            //填充checkRead列表
+            checkRead.Clear();
+            checkRead.Add(listenfd);
             foreach (ClientState s in clients.Values)
             {
-                Socket clientfd = s.socket;
-                if (clientfd.Poll(0, SelectMode.SelectRead))
+                checkRead.Add(s.socket);
+            }
+            //select
+            Socket.Select(checkRead, null, null, 1000);
+            //检查可读对象
+            foreach (Socket s in checkRead)
+            {
+                if (s == listenfd)
                 {
-                    if (!ReadClientfd(clientfd))
-                    {
-                        break;
-                    }
+                    ReadListenfd(s);
+                }
+                else
+                {
+                    ReadClientfd(s);
                 }
             }
-            //防止CPU占用过高
-            System.Threading.Thread.Sleep(1);
         }
     }
 }
