@@ -24,7 +24,8 @@ public class Echo : MonoBehaviour
         socket = new Socket(AddressFamily.InterNetwork,
             SocketType.Stream, ProtocolType.Tcp);
         //Connect
-        socket.BeginConnect("127.0.0.1", 8888, ConnectCallback, socket);
+        //socket.BeginConnect("127.0.0.1", 8888, ConnectCallback, socket);
+        socket.Connect("127.0.0.1", 8888);
     }
 
     //Connect»Øµ÷
@@ -90,6 +91,18 @@ public class Echo : MonoBehaviour
     }
     public void Update()
     {
-        text.text = recvStr;
+        if (socket == null)
+        {
+            return;
+        }
+
+        if (socket.Poll(0, SelectMode.SelectRead))
+        {
+            byte[] readBuff = new byte[1024];
+            int count = socket.Receive(readBuff);
+            string recvStr =
+                System.Text.Encoding.Default.GetString(readBuff, 0, count);
+            text.text = recvStr;
+        }
     }
 }
