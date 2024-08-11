@@ -27,6 +27,7 @@ public class Echo : MonoBehaviour
     //µã»÷·¢ËÍ°´Å¥
     public void Send()
     {
+        Debug.Log("Hello: " + gameObject.name);
         //Send
         string sendStr = InputFeld.text;
         byte[] sendBytes = System.Text.Encoding.Default.GetBytes(sendStr);
